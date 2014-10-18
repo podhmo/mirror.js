@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="bower_components/mithril/mithril.js"></script>
+  </head>
+  <body>
+    <script>
+      var app = {};
+
+      app.vm = {
+      };
+
+      app.vm.init = function(){
+        this.title = m.prop("*dummy*");
+      };
+
+      app.controller = function(){
+        app.vm.init();
+      };
+
+      app.view = function(){
+        return m("html", [m("body", [
+           m("h1", app.vm.title()),
+           m("input", {onchange: m.withAttr("value", app.vm.title)})
+        ])]);
+      };
+      m.module(document, app);
+    </script>
+  </body>
+</html>

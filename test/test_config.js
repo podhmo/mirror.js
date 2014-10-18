@@ -15,6 +15,33 @@ describe("Config", function(){
       assert(attrs.type === "number");
     });
   });
+  describe("number", function(){
+    it("schema type[number] -> form type[number]", function(){
+      var attrs = {};
+      var schema = {"type": "number"};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.type === "number");
+    });
+  });
+  describe("boolean", function(){
+    it("schema type[boolean] -> form type[checkbox]", function(){
+      var attrs = {};
+      var schema = {"type": "boolean"};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.type === "checkbox");
+    });
+  });
+  describe("string", function(){
+    it("schema type[string] -> form type[text]", function(){
+      var attrs = {};
+      var schema = {"type": "string"};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.type === "text");
+    });
+  });
   describe("default", function(){
     it("schema type[] -> form type[text]", function(){
       var attrs = {};
@@ -25,14 +52,3 @@ describe("Config", function(){
     });
   });
 });
-// describe('Array', function () {
-//     beforeEach(function () {
-//         this.ary = [1, 2, 3];
-//     });
-//     describe('#indexOf()', function () {
-//         it('should return index when the value is present', function () {
-//             var zero = 0, two = 2;
-//             assert(this.ary.indexOf(zero) === two);
-//         });
-//     });
-// });

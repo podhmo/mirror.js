@@ -1,29 +1,46 @@
 //test
 
 var Schema = {
-  "type": "object",
-  "title": "Group",
   "properties": {
+    "id": {
+      "type": "integer"
+    },
     "name": {
       "type": "string",
-      "maxLength": 255
+      "maxLength": 32
     },
-    "created_at": {
+    "surname": {
       "type": "string",
-      "format": "date-time"
+      "maxLength": 32
     },
-    "id": {
+    "gender": {
+      "type": "string",
+      "maxLength": 1,
+      "enum": [
+        "M",
+        "F"
+      ]
+    },
+    "birthday": {
+      "type": "string",
+      "format": "date"
+    },
+    "age": {
       "type": "integer"
     }
   },
+  "type": "object",
+  "title": "Person",
   "required": [
-    "id"
+    "id",
+    "name",
+    "surname",
+    "gender"
   ]
 };
 
 function Config(){
 }
-
 Config.prototype.string = function(schema, attrs){
   attrs.type = "text";
   if(schema.hasOwnProperty("maxLength")){
@@ -65,15 +82,22 @@ Layout.prototype.renderField = function(vm, schema, k){
   return this.renderFieldOuter(k, this.renderFieldCore(vm, schema, k));
 };
 Layout.prototype.renderFieldCore = function(vm, schema, k){
-  var attrs = {onchange: m.withAttr("value", vm[k]), value: vm[k]()};
   var subschema = schema.properties[k];
-  this.config.putAttrs(subschema, attrs);
-  if(!!schema.required){
-    if(schema.required.indexOf(k) >= 0){
-      attrs.required = "required";
+  var attrs = {onchange: m.withAttr("value", vm[k]), value: vm[k]()};
+  if(!!subschema.enum){
+    var candidates = subschema.enum.map(function(e){
+      return m("option", {value: e}, [e]);
+    });
+    return m("select", attrs, candidates);
+  }else {
+    this.config.putAttrs(subschema, attrs);
+    if(!!schema.required){
+      if(schema.required.indexOf(k) >= 0){
+        attrs.required = "required";
+      }
     }
+    return m("input", attrs);
   }
-  return m("input", attrs);
 };
 Layout.prototype.renderForm = function(fields){
   return m("div", fields);
@@ -82,12 +106,12 @@ Layout.prototype.renderForm = function(fields){
 function Builder(layout){
   this.layout = layout;
 }
-Builder.prototype.buildVM = function(schema){
+Builder.prototype.buildViewModel = function(schema, defaults){
   var vm = {};
   vm.init = function(){
     for(var k in schema.properties){
       if(schema.properties.hasOwnProperty(k)){
-        this[k] = m.prop("");
+        this[k] = m.prop(defaults[k] || "");
       }
     }
     return this;
@@ -109,18 +133,19 @@ Builder.prototype.buildView = function(schema){
     return this.layout.renderForm(fields);
   }.bind(this);
 };
-Builder.prototype.buildC = function(vm){
+Builder.prototype.buildController = function(vm){
   return function(){
     this.vm = vm.init();
   };
 };
-Builder.prototype.build = function(schema){
-  var module = {vm: this.buildVM(schema), view: this.buildView(schema)};
-  module.controller = this.buildC(module.vm);
+Builder.prototype.build = function(schema, defaults){
+  var module = {vm: this.buildViewModel(schema, defaults), view: this.buildView(schema)};
+  module.controller = this.buildController(module.vm);
   return module;
 };
 
-var app = new Builder(new Layout(new Config())).build(Schema);
+var defaults = {id: 1};
+var app = new Builder(new Layout(new Config())).build(Schema, defaults);
 var coreView = app.view;
 app.view = function(ctrl){
   return m("div", [

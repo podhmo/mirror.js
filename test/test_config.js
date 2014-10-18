@@ -23,6 +23,30 @@ describe("Config", function(){
       this.config.putAttrs(schema, attrs);
       assert(attrs.type === "number");
     });
+    it("schema multipleOf -> form step", function(){
+      var attrs = {};
+      var multipleOf = 3;
+      var schema = {"type": "number", multipleOf: multipleOf};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.step === multipleOf);
+    });
+    it("schema maximum -> form step", function(){
+      var attrs = {};
+      var maximum = 100;
+      var schema = {"type": "number", maximum: maximum};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.max === maximum);
+    });
+    it("schema minimum,exclusiveMinimum -> form step", function(){
+      var attrs = {};
+      var minimum = 100;
+      var schema = {"type": "number", minimum: minimum, exclusiveMinimum: true};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.min === minimum+1);
+    });
   });
   describe("boolean", function(){
     it("schema type[boolean] -> form type[checkbox]", function(){
@@ -83,7 +107,30 @@ describe("Config", function(){
       this.config.putAttrs(schema, attrs);
       assert(attrs.type === "color");
     });
+    it("schema pattern -> form pattern", function(){
+      var attrs = {};
+      var pattern = '^\w+([.-]?\w+)*@\w+([.-]?\w+)*(.\w{2,3})+$';
+      var schema = {"pattern": pattern};
 
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.pattern === pattern);
+    });
+    it("schema minLength -> form minlength", function(){
+      var attrs = {};
+      var minLength = 4;
+      var schema = {"minLength": minLength};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.minlength === minLength);
+    });
+    it("schema maxLength -> form maxlength", function(){
+      var attrs = {};
+      var maxLength = 4;
+      var schema = {"maxLength": maxLength};
+
+      this.config.putAttrs(schema, attrs);
+      assert(attrs.maxlength === maxLength);
+    });
   });
   describe("default", function(){
     it("schema type[] -> form type[text]", function(){

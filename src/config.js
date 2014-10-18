@@ -29,6 +29,33 @@ Config.prototype.date_time = function(schema, attrs){
   return attrs;
 };
 
+Config.prototype.email = function(schema, attrs){
+  attrs.type = "email";
+  return attrs;
+};
+
+//format: hostname,ipv4,ipv6
+
+Config.prototype.uri = function(schema, attrs){
+  attrs.type = "url";
+  return attrs;
+};
+
+//extended-format: time, date, color
+Config.prototype.time = function(schema, attrs){
+  attrs.type = "time";
+  return attrs;
+};
+
+Config.prototype.date = function(schema, attrs){
+  attrs.type = "date";
+  return attrs;
+};
+
+Config.prototype.color = function(schema, attrs){
+  attrs.type = "color";
+  return attrs;
+};
 
 Config.prototype.putAttrs = function(schema, attrs){
   if(!!schema.format){

@@ -44,16 +44,25 @@ Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
 };
 
 Renderer.prototype.radio = function(props, subschema, k, attrs){
+  var default_value = props[k]();
   var candidates = subschema.enum.map(function(e){
     var cattrs = {type:"radio", value: e, name: k, onclick: m.withAttr("value", props[k])};
+    if(default_value === e){
+      cattrs.checked = "checked";
+    }
     return m("label", [e, m("input", cattrs)]);
   });
   return m("div.form-control", candidates);
 };
 
 Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
+  var default_value = props[k]();
   var candidates = subschema.enum.map(function(e){
-    return m("option", {value: e}, [e]);
+    var cattrs = {value: e};
+    if(default_value === e){
+      cattrs.checked = "checked";
+    }
+    return m("option", cattrs, [e]);
   });
   if(!!multiple){
     attrs.multiple = "multiple";
@@ -75,8 +84,12 @@ Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
     var prop = props[k]();
     prop.change(e.currentTarget.value, e.currentTarget.checked);
   };
+  var default_value = props[k]().items;
   var candidates = subschema.enum.map(function(e){
     var cattrs = {type:"checkbox", value: e, name: k, onclick: addfn};
+    if(default_value.indexOf(e) >= 0){
+      cattrs.checked = "checked";
+    }
     return m("label", [e, m("input", cattrs)]);
   });
   return m("div.form-control", candidates);

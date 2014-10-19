@@ -55,7 +55,12 @@ Config.prototype.uri = function(schema, attrs){
   return attrs;
 };
 
-//extended-format: time, date, color
+//extended-format: time, date, color, tel
+Config.prototype.tel = function(schema, attrs){
+  attrs.type = "tel";
+  return attrs;
+};
+
 Config.prototype.time = function(schema, attrs){
   attrs.type = "time";
   return attrs;
@@ -77,6 +82,9 @@ Config.prototype.password = function(schema, attrs){
 };
 
 Config.prototype.putAttrsCommon = function(schema, attrs){
+  if(!!schema.placeholder){
+    attrs.placeholder = schema.placeholder;
+  }
   return attrs;
 };
 
@@ -110,45 +118,63 @@ function Renderer(config){
 // bootstrap
 
 Renderer.prototype.renderField = function(vm, schema, k){
-  return this.renderFieldOuter(k, vm.errors, this.renderFieldInner(vm.attributes, schema, k));
+  var context = {
+    props: vm.attributes,
+    errors: vm.errors || {},
+    propkey: k,
+    schema: schema || {}
+  };
+  return this.renderFieldOuter(context, this.renderFieldInner(context));
 };
 
-Renderer.prototype.renderFieldOuter = function(k , errors, content){
+Renderer.prototype.renderFieldOuter = function(ctx, content){
+  var k = ctx.propkey;
+  var label = [k];
+  if(!!ctx.schema.required && ctx.schema.required.indexOf(k) >= 0){
+    label.push(m("span", ["*"]));
+  }
+  var errors = ctx.errors;
   if(!!errors[k]){
     return m("div.form-group.has-error", [
-      m("label.control-label", {"for": k}, [k]),
+      m("label.control-label", {"for": k}, label),
       m("div.has-feedback", [content]),
       m("span.form-control-feedback", {"style": {"position": "static"}}, [errors[k]])
     ]);
   }else {
     return m("div.form-group", [
-      m("label.control-label", {"for": k}, [k]),
+      m("label.control-label", {"for": k}, label),
       m("div", [content])
     ]);
-}
-};
-
-Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
-  if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs);
-  }else {
-    return this.input(props, subschema, k, attrs);
   }
 };
 
-Renderer.prototype.input = function(props, subschema, k, attrs){
-  return m("input.form-control", attrs);
-};
-
-Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldUnit = function(ctx, subschema, attrs){
   if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs);
+    return this[subschema.widget](ctx, subschema, attrs);
   }else {
-    return this.select(props, subschema, k, attrs);
+    return this.input(ctx, subschema, attrs);
   }
 };
 
-Renderer.prototype.radio = function(props, subschema, k, attrs){
+Renderer.prototype.input = function(ctx, subschema, attrs){
+  if(subschema.type === "boolean"){
+    return m("div.form-control", [m("input", attrs)]);
+  }else{
+    return m("input.form-control", attrs);
+  }
+};
+
+Renderer.prototype.renderFieldCandidates = function(ctx, subschema, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](ctx, subschema, attrs);
+  }else {
+    return this.select(ctx, subschema, attrs);
+  }
+};
+
+Renderer.prototype.radio = function(ctx, subschema, attrs){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var default_value = props[k]();
   var candidates = subschema.enum.map(function(e){
     var cattrs = {type:"radio", value: e, name: k, onclick: m.withAttr("value", props[k])};
@@ -160,7 +186,9 @@ Renderer.prototype.radio = function(props, subschema, k, attrs){
   return m("div.form-control", candidates);
 };
 
-Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
+Renderer.prototype.select = function(ctx, subschema, attrs, multiple){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var candidates;
   var default_value;
   if(multiple){
@@ -187,15 +215,17 @@ Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
 };
 
 
-Renderer.prototype.renderFieldMultiple = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldMultiple = function(ctx, subschema, attrs){
   if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs, true);
+    return this[subschema.widget](ctx, subschema, attrs,true);
   }else {
-    return this.select(props, subschema, k, attrs, true);
+    return this.select(ctx, subschema, attrs,true);
   }
 };
 
-Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
+Renderer.prototype.check = function(ctx, subschema, attrs, multiple){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var addfn = function(e){
     var prop = props[k]();
     prop.change(e.currentTarget.value, e.currentTarget.checked);
@@ -211,7 +241,10 @@ Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
   return m("div.form-control", candidates);
 };
 
-Renderer.prototype.renderFieldInner = function(props, schema, k){
+Renderer.prototype.renderFieldInner = function(ctx){
+  var k = ctx.propkey;
+  var props = ctx.props;
+  var schema = ctx.schema;
   var attrs = {onchange: m.withAttr("value", props[k]), value: props[k]()};
   if(!!schema.required){
     if(schema.required.indexOf(k) >= 0){
@@ -220,12 +253,12 @@ Renderer.prototype.renderFieldInner = function(props, schema, k){
   }
   var subschema = schema.properties[k];
   if(!!subschema.type && subschema.type === "array"){
-    return this.renderFieldMultiple(props, subschema, k, attrs);
+    return this.renderFieldMultiple(ctx, subschema, attrs);
   }else if(!!subschema.enum){
-    return this.renderFieldCandidates(props, subschema, k, attrs);
+    return this.renderFieldCandidates(ctx, subschema, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);
-    return this.renderFieldUnit(props, subschema, k, attrs);
+    return this.renderFieldUnit(ctx, subschema, attrs);
   }
 };
 
@@ -384,6 +417,7 @@ Builder.prototype.build = function(schema, defaults, errors){
 
 //for node.
 if(typeof module != "undefined" && module !== null){
+  Collection = require("./collection");
   module.exports = Builder;
   Number.parseInt = parseInt;
   Number.parseFloat = function(n){return +n;};

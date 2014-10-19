@@ -25,10 +25,12 @@
             "maxLength": 32
           },
           "surname": {
+"placeholder":"surname",
             "type": "string",
             "maxLength": 32
           },
           "gender": {
+"widget": "radio",
             "type": "string",
             "maxLength": 1,
             "enum": [
@@ -37,6 +39,7 @@
             ]
           },
           "multiitem": {
+"widget": "check",
             "type": "array",
             "enum": [
               "A",
@@ -50,8 +53,15 @@
             "type": "string",
             "format": "date"
           },
+          "subscribe": {
+            "type": "boolean"
+          },
           "age": {
             "type": "integer"
+          },
+          "personalColor": {
+            "type": "string",
+            "format": "color"
           }
         },
         "type": "object",

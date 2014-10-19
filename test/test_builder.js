@@ -50,5 +50,22 @@ describe("Renderer", function(){
       result.x("300.1");
       assert(result.jsonify() === JSON.stringify({"x": 300.1}, null, 2));
     });
+    it("building view model construct, with $ref and definitions", function(){
+      var schema = {'definitions': {'Group': {'properties': {'id': {'description': 'primary key',
+                                                                    'type': 'integer'},
+                                                             'name': {'maxLength': 255,
+                                                                      'type': 'string'}},
+                                              'type': 'object'}},
+                    'properties': {'id': {'description': 'primary key', 'type': 'integer'},
+                                   'name': {'maxLength': 255, 'type': 'string'},
+                                   'group': {'$ref': '#/definitions/Group'}},
+                    'required': ['id'],
+                    'title': 'User',
+                    'type': 'object'};
+      var result = this.builder.buildViewModel(schema);
+      result.init();
+      assert(result.jsonify() === JSON.stringify({"id": null, "name": "", "group": {"id": null, "name": ""}}, null, 2));
+
+    });
   });
 });

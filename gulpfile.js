@@ -17,8 +17,6 @@ gulp.task('default', function(){
 gulp.task('test', ["power-assert"], function(){
   gulp.src(paths.powered_test)
         .pipe(mocha());
-  // gulp.src(['head.js', 'src/*.js', 'test/*.js'])
-  //   .pipe(mocha({reporter: 'spec'}));
 });
 
 gulp.task("power-assert", function () {

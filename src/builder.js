@@ -16,22 +16,44 @@ function propWrap(parse, prop){
   return wrap;
 }
 
+Builder.prototype.buildViewModelFromDefinition = function(vm, schema, defaults, ref){
+  // supports only #/definitions/foo
+  var nodes = ref.substr(2, ref.length).split("/");
+  var subschema = schema;
+  for(var i=0,j=nodes.length; i<j; i++){
+    subschema = subschema[nodes[i]];
+  }
+  var result = this.buildViewModelObject(vm, subschema, defaults);
+  return result;
+};
+
 Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
   defaults = defaults || {};
   for(var k in schema.properties){
-    if(!!schema.properties[k]){
-      if(!!schema.properties[k].properties){
-        vm[k] = this.buildViewModelObject({}, schema.properties[k], defaults[k]);
+    if(schema.properties.hasOwnProperty(k)){
+      var subschema = schema.properties[k];
+      if(!!subschema.properties){
+        vm[k] = this.buildViewModelObject({}, subschema, defaults[k]);
       }else{
-        var typ = schema.properties[k].type;
+        var typ = subschema.type;
         if(typ === "arary"){
-          vm[k] = m.prop(defaults[k] || []);
+          vm[k] = m.prop(defaults[k] || []); //xxx;
         }else if(typ === "integer"){
           vm[k] = propWrap(Number.parseInt, m.prop(Number.parseInt(defaults[k])));
         }else if(typ === "number"){
           vm[k] = propWrap(Number.parseFloat, m.prop(Number.parseFloat(defaults[k])));
-        }else if(!schema.properties[k].type){
-          vm[k] = this.buildViewModelObject({}, {"properties": schema.properties[k]}, defaults[k]);
+        }else if(typ === "object"){
+          if(!!subschema.$ref){
+            vm[k] = this.buildViewModelFromDefinition({}, schema, defaults, subschema.$ref);
+          }else {
+            vm[k] = this.buildViewModelObject({}, subschema, defaults[k]);
+          }
+        }else if(!subschema.type){
+          if(!!subschema.$ref){
+            vm[k] = this.buildViewModelFromDefinition({}, schema, defaults, subschema.$ref);
+          }else {
+            vm[k] = this.buildViewModelObject({}, {"properties": subschema}, defaults[k]);
+          }
         }else {
           vm[k] = m.prop(defaults[k] || "");
         }

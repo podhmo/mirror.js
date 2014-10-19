@@ -109,6 +109,7 @@ Builder.prototype.build = function(schema, defaults, errors){
 
 //for node.
 if(typeof module != "undefined" && module !== null){
+  Collection = require("./collection");
   module.exports = Builder;
   Number.parseInt = parseInt;
   Number.parseFloat = function(n){return +n;};

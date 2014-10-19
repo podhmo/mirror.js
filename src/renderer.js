@@ -5,19 +5,31 @@ function Renderer(config){
 // bootstrap
 
 Renderer.prototype.renderField = function(vm, schema, k){
-  return this.renderFieldOuter(k, vm.errors, this.renderFieldInner(vm.attributes, schema, k));
+  var context = {
+    props: vm.attributes,
+    errors: vm.errors || {},
+    attrname: k,
+    schema: schema || {}
+  };
+  return this.renderFieldOuter(context, this.renderFieldInner(context));
 };
 
-Renderer.prototype.renderFieldOuter = function(k , errors, content){
+Renderer.prototype.renderFieldOuter = function(ctx, content){
+  var k = ctx.attrname;
+  var label = [k];
+  if(!!ctx.schema.required && ctx.schema.required.indexOf(k) >= 0){
+    label.push(m("span", ["*"]));
+  }
+  var errors = ctx.errors;
   if(!!errors[k]){
     return m("div.form-group.has-error", [
-      m("label.control-label", {"for": k}, [k]),
+      m("label.control-label", {"for": k}, label),
       m("div.has-feedback", [content]),
       m("span.form-control-feedback", {"style": {"position": "static"}}, [errors[k]])
     ]);
   }else {
     return m("div.form-group", [
-      m("label.control-label", {"for": k}, [k]),
+      m("label.control-label", {"for": k}, label),
       m("div", [content])
     ]);
   }
@@ -110,7 +122,10 @@ Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
   return m("div.form-control", candidates);
 };
 
-Renderer.prototype.renderFieldInner = function(props, schema, k){
+Renderer.prototype.renderFieldInner = function(ctx){
+  var k = ctx.attrname;
+  var props = ctx.props;
+  var schema = ctx.schema;
   var attrs = {onchange: m.withAttr("value", props[k]), value: props[k]()};
   if(!!schema.required){
     if(schema.required.indexOf(k) >= 0){

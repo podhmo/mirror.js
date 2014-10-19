@@ -51,13 +51,13 @@ describe("Renderer", function(){
   });
   describe("renderFieldOuter", function(){
     it("outer normal case", function(){
-      var result = this.renderer.renderFieldOuter({attrname: "attrname", errors: {}, schema: {}}, "*content*");
-      assert(containsText("attrname", result));
+      var result = this.renderer.renderFieldOuter({propkey: "propkey", errors: {}, schema: {}}, "*content*");
+      assert(containsText("propkey", result));
       assert(containsTag("label", result));
     });
     it("outer error case", function(){
-      var result = this.renderer.renderFieldOuter({attrname: "attrname", errors: {"attrname": "*mismatch*"}, schema: {}}, "*content*");
-      assert(containsText("attrname", result));
+      var result = this.renderer.renderFieldOuter({propkey: "propkey", errors: {"propkey": "*mismatch*"}, schema: {}}, "*content*");
+      assert(containsText("propkey", result));
       assert(containsTag("label", result));
       assert(containsText("*mismatch*", result));
     });
@@ -66,7 +66,7 @@ describe("Renderer", function(){
     it("with enum, in default, select element is used", function(){
       var vm = {"x": m.prop("")};
       var schema = {"properties": {"x": {"type": "string", "enum": ["a","b","c"]}}};
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
 
       assert(containsTag("select", result));
@@ -78,7 +78,7 @@ describe("Renderer", function(){
     it("with enum, widget[radio], select element is used", function(){
       var vm = {"x": m.prop("")};
       var schema = {"properties": {"x": {"type": "string", "enum": ["a","b","c"], "widget": "radio"}}};
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
 
       assert(containsTag("input", result));
@@ -89,7 +89,7 @@ describe("Renderer", function(){
     it("type[array], in default, select element is used(multiple)", function(){
       var vm = {"x": m.prop(new Collection([]))};
       var schema = {"properties": {"x": {"type": "array", "enum": ["a","b","c"]}}};
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
       assert(containsTag("select", result));
       assert(containsAttrs("multiple", "multiple", result));
@@ -103,14 +103,14 @@ describe("Renderer", function(){
       var schema = {"properties": {"x": {"type": "string", "enum": ["a","b","c"]}},
                     "required": ["x"]
                    };
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
       assert(result.attrs.required === "required");
     });
     it("normally, input is used", function(){
       var vm = {"x": m.prop("")};
       var schema = {"properties": {"x": {"type": "string"}}};
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
       assert(containsTag("input", result));
     });
@@ -118,7 +118,7 @@ describe("Renderer", function(){
       var vm = {"x": m.prop("")};
       var schema = {"properties": {"x": {"type": "string"}},
                    "required": ["x"]};
-      var context = {props: vm, schema: schema, errors: {}, attrname: "x"};
+      var context = {props: vm, schema: schema, errors: {}, propkey: "x"};
       var result = this.renderer.renderFieldInner(context);
       assert(result.attrs.required == "required");
     });

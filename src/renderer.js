@@ -8,14 +8,14 @@ Renderer.prototype.renderField = function(vm, schema, k){
   var context = {
     props: vm.attributes,
     errors: vm.errors || {},
-    attrname: k,
+    propkey: k,
     schema: schema || {}
   };
   return this.renderFieldOuter(context, this.renderFieldInner(context));
 };
 
 Renderer.prototype.renderFieldOuter = function(ctx, content){
-  var k = ctx.attrname;
+  var k = ctx.propkey;
   var label = [k];
   if(!!ctx.schema.required && ctx.schema.required.indexOf(k) >= 0){
     label.push(m("span", ["*"]));
@@ -35,15 +35,15 @@ Renderer.prototype.renderFieldOuter = function(ctx, content){
   }
 };
 
-Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldUnit = function(ctx, subschema, attrs){
   if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs);
+    return this[subschema.widget](ctx, subschema, attrs);
   }else {
-    return this.input(props, subschema, k, attrs);
+    return this.input(ctx, subschema, attrs);
   }
 };
 
-Renderer.prototype.input = function(props, subschema, k, attrs){
+Renderer.prototype.input = function(ctx, subschema, attrs){
   if(subschema.type === "boolean"){
     return m("div.form-control", [m("input", attrs)]);
   }else{
@@ -51,15 +51,17 @@ Renderer.prototype.input = function(props, subschema, k, attrs){
   }
 };
 
-Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldCandidates = function(ctx, subschema, attrs){
   if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs);
+    return this[subschema.widget](ctx, subschema, attrs);
   }else {
-    return this.select(props, subschema, k, attrs);
+    return this.select(ctx, subschema, attrs);
   }
 };
 
-Renderer.prototype.radio = function(props, subschema, k, attrs){
+Renderer.prototype.radio = function(ctx, subschema, attrs){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var default_value = props[k]();
   var candidates = subschema.enum.map(function(e){
     var cattrs = {type:"radio", value: e, name: k, onclick: m.withAttr("value", props[k])};
@@ -71,7 +73,9 @@ Renderer.prototype.radio = function(props, subschema, k, attrs){
   return m("div.form-control", candidates);
 };
 
-Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
+Renderer.prototype.select = function(ctx, subschema, attrs, multiple){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var candidates;
   var default_value;
   if(multiple){
@@ -98,15 +102,17 @@ Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
 };
 
 
-Renderer.prototype.renderFieldMultiple = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldMultiple = function(ctx, subschema, attrs){
   if(!!subschema.widget){
-    return this[subschema.widget](props, subschema, k, attrs, true);
+    return this[subschema.widget](ctx, subschema, attrs,true);
   }else {
-    return this.select(props, subschema, k, attrs, true);
+    return this.select(ctx, subschema, attrs,true);
   }
 };
 
-Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
+Renderer.prototype.check = function(ctx, subschema, attrs, multiple){
+  var props = ctx.props;
+  var k = ctx.propkey;
   var addfn = function(e){
     var prop = props[k]();
     prop.change(e.currentTarget.value, e.currentTarget.checked);
@@ -123,7 +129,7 @@ Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
 };
 
 Renderer.prototype.renderFieldInner = function(ctx){
-  var k = ctx.attrname;
+  var k = ctx.propkey;
   var props = ctx.props;
   var schema = ctx.schema;
   var attrs = {onchange: m.withAttr("value", props[k]), value: props[k]()};
@@ -134,12 +140,12 @@ Renderer.prototype.renderFieldInner = function(ctx){
   }
   var subschema = schema.properties[k];
   if(!!subschema.type && subschema.type === "array"){
-    return this.renderFieldMultiple(props, subschema, k, attrs);
+    return this.renderFieldMultiple(ctx, subschema, attrs);
   }else if(!!subschema.enum){
-    return this.renderFieldCandidates(props, subschema, k, attrs);
+    return this.renderFieldCandidates(ctx, subschema, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);
-    return this.renderFieldUnit(props, subschema, k, attrs);
+    return this.renderFieldUnit(ctx, subschema, attrs);
   }
 };
 

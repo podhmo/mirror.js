@@ -77,6 +77,9 @@ Config.prototype.password = function(schema, attrs){
 };
 
 Config.prototype.putAttrsCommon = function(schema, attrs){
+  if(!!schema.placeholder){
+    attrs.placeholder = schema.placeholder;
+  }
   return attrs;
 };
 

@@ -20,7 +20,7 @@ Renderer.prototype.renderFieldOuter = function(k , errors, content){
       m("label.control-label", {"for": k}, [k]),
       m("div", [content])
     ]);
-}
+  }
 };
 
 Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
@@ -32,7 +32,11 @@ Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
 };
 
 Renderer.prototype.input = function(props, subschema, k, attrs){
-  return m("input.form-control", attrs);
+  if(subschema.type === "boolean"){
+    return m("div.form-control", [m("input", attrs)]);
+  }else{
+    return m("input.form-control", attrs);
+  }
 };
 
 Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){

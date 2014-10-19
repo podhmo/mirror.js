@@ -55,7 +55,12 @@ Config.prototype.uri = function(schema, attrs){
   return attrs;
 };
 
-//extended-format: time, date, color
+//extended-format: time, date, color, tel
+Config.prototype.tel = function(schema, attrs){
+  attrs.type = "tel";
+  return attrs;
+};
+
 Config.prototype.time = function(schema, attrs){
   attrs.type = "time";
   return attrs;

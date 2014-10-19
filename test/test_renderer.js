@@ -51,15 +51,22 @@ describe("Renderer", function(){
   });
   describe("renderFieldOuter", function(){
     it("outer normal case", function(){
-      var result = this.renderer.renderFieldOuter({propkey: "propkey", errors: {}, schema: {}}, "*content*");
+      var context = {propkey: "propkey", errors: {}, schema: {}};
+      var result = this.renderer.renderFieldOuter(context, "*content*");
       assert(containsText("propkey", result));
       assert(containsTag("label", result));
     });
     it("outer error case", function(){
-      var result = this.renderer.renderFieldOuter({propkey: "propkey", errors: {"propkey": "*mismatch*"}, schema: {}}, "*content*");
+      var context = {propkey: "propkey", errors: {"propkey": "*mismatch*"}, schema: {}};
+      var result = this.renderer.renderFieldOuter(context, "*content*");
       assert(containsText("propkey", result));
       assert(containsTag("label", result));
       assert(containsText("*mismatch*", result));
+    });
+    it("outer error case", function(){
+      var context = {propkey: "propkey", errors: {}, schema: {required: ["propkey"]}};
+      var result = this.renderer.renderFieldOuter(context, "*content*");
+      assert(containsText("*", result)); // required mark;
     });
   });
   describe("renderFieldInner", function(){

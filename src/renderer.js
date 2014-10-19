@@ -51,11 +51,35 @@ Renderer.prototype.radio = function(props, subschema, k, attrs){
   return m("div.form-control", candidates);
 };
 
-Renderer.prototype.select = function(props, subschema, k, attrs){
+Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
   var candidates = subschema.enum.map(function(e){
     return m("option", {value: e}, [e]);
   });
+  if(!!multiple){
+    attrs.multiple = "multiple";
+  }
   return m("select.form-control", attrs, candidates);
+};
+
+
+Renderer.prototype.renderFieldMultiple = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs, true);
+  }else {
+    return this.select(props, subschema, k, attrs, true);
+  }
+};
+
+Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
+  var addfn = function(e){
+    var prop = props[k]();
+    prop.change(e.currentTarget.value, e.currentTarget.checked);
+  };
+  var candidates = subschema.enum.map(function(e){
+    var cattrs = {type:"checkbox", value: e, name: k, onclick: addfn};
+    return m("label", [e, m("input", cattrs)]);
+  });
+  return m("div.form-control", candidates);
 };
 
 Renderer.prototype.renderFieldInner = function(props, schema, k){
@@ -66,7 +90,9 @@ Renderer.prototype.renderFieldInner = function(props, schema, k){
     }
   }
   var subschema = schema.properties[k];
-  if(!!subschema.enum){
+  if(!!subschema.type && subschema.type === "array"){
+    return this.renderFieldMultiple(props, subschema, k, attrs);
+  }else if(!!subschema.enum){
     return this.renderFieldCandidates(props, subschema, k, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);

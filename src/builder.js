@@ -36,8 +36,9 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         vm[k] = this.buildViewModelObject({}, subschema, defaults[k]);
       }else{
         var typ = subschema.type;
-        if(typ === "arary"){
-          vm[k] = m.prop(defaults[k] || []); //xxx;
+        if(typ === "array"){
+          vm[k] = m.prop(new Collection(defaults[k] || [])); //xxx;
+          vm[k]().bind(vm[k]);
         }else if(typ === "integer"){
           vm[k] = propWrap(Number.parseInt, m.prop(Number.parseInt(defaults[k])));
         }else if(typ === "number"){
@@ -57,7 +58,8 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         }else {
           vm[k] = m.prop(defaults[k] || "");
         }
-        if(!!subschema.enum){
+        // xxx:
+        if(!!subschema.enum && subschema.type !== "array"){
           vm[k](subschema.enum[0]);
         }
       }
@@ -103,6 +105,7 @@ Builder.prototype.build = function(schema, defaults, errors){
   module.controller = this.buildController(module.vm);
   return module;
 };
+
 
 //for node.
 if(typeof module != "undefined" && module !== null){

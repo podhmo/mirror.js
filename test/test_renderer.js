@@ -31,6 +31,20 @@ var containsTag = function(k, tree){
   return false;
 };
 
+var containsAttrs = function(k, v, tree){
+  if (!!tree.attrs && tree.attrs[k] && tree.attrs[k] === v) {
+    return true;
+  }
+  if (!!tree.children) {
+    for(var i=0,j=tree.children.length; i<j; i++){
+      if(containsAttrs(k, tree.children[i])){
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 describe("Renderer", function(){
   beforeEach(function(){
     this.renderer = new renderer(new config());
@@ -66,6 +80,18 @@ describe("Renderer", function(){
       var result = this.renderer.renderFieldInner(vm, schema, "x");
 
       assert(containsTag("input", result));
+      assert(containsText("a", result));
+      assert(containsText("b", result));
+      assert(containsText("c", result));
+    });
+    it("type[array], in default, select element is used(multiple)", function(){
+      var vm = {"x": m.prop("")};
+      var schema = {"properties": {"x": {"type": "array", "enum": ["a","b","c"]}}};
+      var result = this.renderer.renderFieldInner(vm, schema, "x");
+
+      assert(containsTag("select", result));
+      assert(containsAttrs("multiple", "multiple", result));
+      assert(containsTag("option", result));
       assert(containsText("a", result));
       assert(containsText("b", result));
       assert(containsText("c", result));

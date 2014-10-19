@@ -128,30 +128,63 @@ Renderer.prototype.renderFieldOuter = function(k , errors, content){
 }
 };
 
-Renderer.prototype.renderFieldInput = function(props, subschema, k, attrs){
+Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs);
+  }else {
+    return this.input(props, subschema, k, attrs);
+  }
+};
+
+Renderer.prototype.input = function(props, subschema, k, attrs){
   return m("input.form-control", attrs);
 };
 
-Renderer.prototype.renderFieldRadioButton = function(props, subschema, k, attrs){
-  return subschema.enum.map(function(e){
+Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs);
+  }else {
+    return this.select(props, subschema, k, attrs);
+  }
+};
+
+Renderer.prototype.radio = function(props, subschema, k, attrs){
+  var candidates = subschema.enum.map(function(e){
     var cattrs = {type:"radio", value: e, name: k, onclick: m.withAttr("value", props[k])};
     return m("label", [e, m("input", cattrs)]);
   });
+  return m("div.form-control", candidates);
 };
 
-Renderer.prototype.renderFieldSelect = function(props, subschema, k, attrs){
+Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
   var candidates = subschema.enum.map(function(e){
     return m("option", {value: e}, [e]);
   });
+  if(!!multiple){
+    attrs.multiple = "multiple";
+  }
   return m("select.form-control", attrs, candidates);
 };
 
-Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
-  if(!!subschema.widget && subschema.widget=="radio"){
-    return this.renderFieldRadioButton(props, subschema, k, attrs);
+
+Renderer.prototype.renderFieldMultiple = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs, true);
   }else {
-    return this.renderFieldSelect(props, subschema, k, attrs);
+    return this.select(props, subschema, k, attrs, true);
   }
+};
+
+Renderer.prototype.check = function(props, subschema, k, attrs, multiple){
+  var addfn = function(e){
+    var prop = props[k]();
+    prop.change(e.currentTarget.value, e.currentTarget.checked);
+  };
+  var candidates = subschema.enum.map(function(e){
+    var cattrs = {type:"checkbox", value: e, name: k, onclick: addfn};
+    return m("label", [e, m("input", cattrs)]);
+  });
+  return m("div.form-control", candidates);
 };
 
 Renderer.prototype.renderFieldInner = function(props, schema, k){
@@ -162,11 +195,13 @@ Renderer.prototype.renderFieldInner = function(props, schema, k){
     }
   }
   var subschema = schema.properties[k];
-  if(!!subschema.enum){
+  if(!!subschema.type && subschema.type === "array"){
+    return this.renderFieldMultiple(props, subschema, k, attrs);
+  }else if(!!subschema.enum){
     return this.renderFieldCandidates(props, subschema, k, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);
-    return this.renderFieldInput(props, subschema, k, attrs);
+    return this.renderFieldUnit(props, subschema, k, attrs);
   }
 };
 
@@ -178,6 +213,40 @@ Renderer.prototype.renderForm = function(fields){
 if(typeof module != "undefined" && module !== null){
   var m = require("mithril");
   module.exports = Renderer;
+}
+
+function Collection(items){
+  this.items = items;
+}
+
+Collection.prototype.toJSON = function(){
+  return this.items.map(function(e){return !!e.toJSON? e.toJSON() : e;});
+};
+
+Collection.prototype.bind = function(e){
+  e.toJSON = this.toJSON.bind(this);
+};
+
+Collection.prototype.add = function(e){
+  if(this.items.indexOf(e) < 0){
+    this.items.push(e);
+  }
+};
+
+Collection.prototype.remove = function(e){
+  this.items = this.items.filter(function(e2){return e !== e2;}); //xxx;
+};
+
+Collection.prototype.change = function(e, checked){
+  if(checked){
+    return this.add(e);
+  }else{
+    return this.remove(e);
+  }
+};
+//for node.
+if(typeof module != "undefined" && module !== null){
+  module.exports = Collection;
 }
 
 function Builder(renderer){
@@ -218,8 +287,9 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         vm[k] = this.buildViewModelObject({}, subschema, defaults[k]);
       }else{
         var typ = subschema.type;
-        if(typ === "arary"){
-          vm[k] = m.prop(defaults[k] || []); //xxx;
+        if(typ === "array"){
+          vm[k] = m.prop(new Collection(defaults[k] || [])); //xxx;
+          vm[k]().bind(vm[k]);
         }else if(typ === "integer"){
           vm[k] = propWrap(Number.parseInt, m.prop(Number.parseInt(defaults[k])));
         }else if(typ === "number"){
@@ -239,7 +309,8 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         }else {
           vm[k] = m.prop(defaults[k] || "");
         }
-        if(!!subschema.enum){
+        // xxx:
+        if(!!subschema.enum && subschema.type !== "array"){
           vm[k](subschema.enum[0]);
         }
       }
@@ -285,6 +356,7 @@ Builder.prototype.build = function(schema, defaults, errors){
   module.controller = this.buildController(module.vm);
   return module;
 };
+
 
 //for node.
 if(typeof module != "undefined" && module !== null){

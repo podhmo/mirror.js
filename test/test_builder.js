@@ -13,7 +13,7 @@ describe("Renderer", function(){
       var schema = {"properties": {"x": {"type": "string"}}};
       var result = this.builder.buildViewModel(schema, {"x": "xxxx"});
       result.init();
-      assert(!!result.x);
+      assert(!!result.attributes.x);
       assert(result.jsonify() === JSON.stringify({"x": "xxxx"}, null, 2));
     });
     it("building view model constructor with nested object", function(){
@@ -39,7 +39,7 @@ describe("Renderer", function(){
       var result = this.builder.buildViewModel(schema, {"x": "10"});
       result.init();
       assert(result.jsonify() === JSON.stringify({"x": 10}, null, 2));
-      result.x("300");
+      result.attributes.x("300");
       assert(result.jsonify() === JSON.stringify({"x": 300}, null, 2));
     });
     it("building view model constructor, number", function(){
@@ -47,7 +47,7 @@ describe("Renderer", function(){
       var result = this.builder.buildViewModel(schema, {"x": "10.1"});
       result.init();
       assert(result.jsonify() === JSON.stringify({"x": 10.1}, null, 2));
-      result.x("300.1");
+      result.attributes.x("300.1");
       assert(result.jsonify() === JSON.stringify({"x": 300.1}, null, 2));
     });
     it("building view model construct, with $ref and definitions", function(){

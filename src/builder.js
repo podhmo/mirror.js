@@ -1,5 +1,5 @@
-function Builder(layout){
-  this.layout = layout;
+function Builder(renderer){
+  this.renderer = renderer;
 }
 
 function propWrap(parse, prop){
@@ -66,10 +66,11 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
 Builder.prototype.buildViewModel = function(schema, defaults){
   var vm = {};
   vm.init = function(){
-    return this.buildViewModelObject(vm, schema, defaults);
+    vm.attributes = {};
+    return this.buildViewModelObject(vm.attributes, schema, defaults);
   }.bind(this);
   vm.jsonify = function(){
-    return JSON.stringify(vm, null, 2);
+    return JSON.stringify(vm.attributes, null, 2);
   };
   return vm;
 };
@@ -80,10 +81,10 @@ Builder.prototype.buildView = function(schema){
     var fields = [];
     for(var k in schema.properties){
       if(schema.properties.hasOwnProperty(k)){
-        fields.push(this.layout.renderField(vm, schema, k));
+        fields.push(this.renderer.renderField(vm, schema, k));
       }
     }
-    return this.layout.renderForm(fields);
+    return this.renderer.renderForm(fields);
   }.bind(this);
 };
 
@@ -93,7 +94,7 @@ Builder.prototype.buildController = function(vm){
   };
 };
 
-Builder.prototype.build = function(schema, defaults){
+Builder.prototype.build = function(schema, defaults, errors){
   var module = {vm: this.buildViewModel(schema, defaults), view: this.buildView(schema)};
   module.controller = this.buildController(module.vm);
   return module;

@@ -102,6 +102,6 @@ Builder.prototype.build = function(schema, defaults){
 //for node.
 if(typeof module != "undefined" && module !== null){
   module.exports = Builder;
-  Number.parseInt = function(n){return +n;};
+  Number.parseInt = parseInt;
   Number.parseFloat = function(n){return +n;};
 }

@@ -2,16 +2,21 @@ function Renderer(config){
   this.config = config;
 }
 
-Renderer.prototype.renderFieldOuter = function(k , core){
-  return m("div", [m("label", [k, ":", core])]);
-};
+// bootstrap
 
 Renderer.prototype.renderField = function(vm, schema, k){
   return this.renderFieldOuter(k, this.renderFieldInner(vm, schema, k));
 };
 
+Renderer.prototype.renderFieldOuter = function(k , core){
+  return m("div.form-group", [
+    m("label.control-label", {"for": k}, [k]),
+    m("div", [core])
+  ]);
+};
+
 Renderer.prototype.renderFieldInput = function(vm, subschema, k, attrs){
-  return m("input", attrs);
+  return m("input.form-control", attrs);
 };
 
 Renderer.prototype.renderFieldSelect = function(vm, subschema, k, attrs){

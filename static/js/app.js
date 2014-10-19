@@ -107,8 +107,13 @@ function Renderer(config){
   this.config = config;
 }
 
+// bootstrap
+
 Renderer.prototype.renderFieldOuter = function(k , core){
-  return m("div", [m("label", [k, ":", core])]);
+  return m("div.form-group", [
+    m("label.control-label", {"for": k}, [k]),
+    m("div", [core])
+  ]);
 };
 
 Renderer.prototype.renderField = function(vm, schema, k){
@@ -116,7 +121,7 @@ Renderer.prototype.renderField = function(vm, schema, k){
 };
 
 Renderer.prototype.renderFieldInput = function(vm, subschema, k, attrs){
-  return m("input", attrs);
+  return m("input.form-control", attrs);
 };
 
 Renderer.prototype.renderFieldSelect = function(vm, subschema, k, attrs){
@@ -257,6 +262,6 @@ Builder.prototype.build = function(schema, defaults){
 //for node.
 if(typeof module != "undefined" && module !== null){
   module.exports = Builder;
-  Number.parseInt = function(n){return +n;};
+  Number.parseInt = parseInt;
   Number.parseFloat = function(n){return +n;};
 }

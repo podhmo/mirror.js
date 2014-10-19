@@ -16,6 +16,12 @@ describe("Renderer", function(){
       assert(!!result.attributes.x);
       assert(result.jsonify() === JSON.stringify({"x": "xxxx"}, null, 2));
     });
+    it("building view model constructor with enum attribute", function(){
+      var schema = {"properties": {"x": {"type": "string", "enum": ["a", "b", "c"]}}};
+      var result = this.builder.buildViewModel(schema, {});
+      result.init();
+      assert(result.jsonify() === JSON.stringify({"x": "a"}, null, 2));
+    });
     it("building view model constructor with nested object", function(){
       var schema = {"properties": {"ob": {"type": "object", "properties": {"x": {"type": "string"}}}}};
       var result = this.builder.buildViewModel(schema, {"ob": {"x": "xxxx"}});

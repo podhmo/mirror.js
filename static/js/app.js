@@ -225,6 +225,9 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         }else {
           vm[k] = m.prop(defaults[k] || "");
         }
+        if(!!subschema.enum){
+          vm[k](subschema.enum[0]);
+        }
       }
     }
   }

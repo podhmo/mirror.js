@@ -21,9 +21,11 @@ var containsTag = function(k, tree){
   if(tree.tag == k){
     return true;
   }
-  for(var i=0,j=tree.children.length; i<j; i++){
-    if(containsTag(k, tree.children[i])){
-      return true;
+  if (!!tree.children) {
+    for(var i=0,j=tree.children.length; i<j; i++){
+      if(containsTag(k, tree.children[i])){
+        return true;
+      }
     }
   }
   return false;
@@ -34,12 +36,12 @@ describe("Renderer", function(){
     this.renderer = new renderer(new config());
   });
   describe("renderFieldOuter", function(){
-    it("outer", function(){
+    it("outer normal case", function(){
       var result = this.renderer.renderFieldOuter("attrname", {}, "*content*");
       assert(containsText("attrname", result));
       assert(containsTag("label", result));
     });
-    it("outer", function(){
+    it("outer error case", function(){
       var result = this.renderer.renderFieldOuter("attrname", {"attrname": "*mismatch*"}, "*content*");
       assert(containsText("attrname", result));
       assert(containsTag("label", result));
@@ -47,13 +49,23 @@ describe("Renderer", function(){
     });
   });
   describe("renderFieldInner", function(){
-    it("with enum, select element is used", function(){
+    it("with enum, in default, select element is used", function(){
       var vm = {"x": m.prop("")};
       var schema = {"properties": {"x": {"type": "string", "enum": ["a","b","c"]}}};
       var result = this.renderer.renderFieldInner(vm, schema, "x");
 
       assert(containsTag("select", result));
       assert(containsTag("option", result));
+      assert(containsText("a", result));
+      assert(containsText("b", result));
+      assert(containsText("c", result));
+    });
+    it("with enum, widget[radio], select element is used", function(){
+      var vm = {"x": m.prop("")};
+      var schema = {"properties": {"x": {"type": "string", "enum": ["a","b","c"], "widget": "radio"}}};
+      var result = this.renderer.renderFieldInner(vm, schema, "x");
+
+      assert(containsTag("input", result));
       assert(containsText("a", result));
       assert(containsText("b", result));
       assert(containsText("c", result));

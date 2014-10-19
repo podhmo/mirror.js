@@ -23,20 +23,43 @@ Renderer.prototype.renderFieldOuter = function(k , errors, content){
 }
 };
 
-Renderer.prototype.renderFieldInput = function(attributes, subschema, k, attrs){
+Renderer.prototype.renderFieldUnit = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs);
+  }else {
+    return this.input(props, subschema, k, attrs);
+  }
+};
+
+Renderer.prototype.input = function(props, subschema, k, attrs){
   return m("input.form-control", attrs);
 };
 
-Renderer.prototype.renderFieldSelect = function(attributes, subschema, k, attrs){
+Renderer.prototype.renderFieldCandidates = function(props, subschema, k, attrs){
+  if(!!subschema.widget){
+    return this[subschema.widget](props, subschema, k, attrs);
+  }else {
+    return this.select(props, subschema, k, attrs);
+  }
+};
+
+Renderer.prototype.radio = function(props, subschema, k, attrs){
+  var candidates = subschema.enum.map(function(e){
+    var cattrs = {type:"radio", value: e, name: k, onclick: m.withAttr("value", props[k])};
+    return m("label", [e, m("input", cattrs)]);
+  });
+  return m("div.form-control", candidates);
+};
+
+Renderer.prototype.select = function(props, subschema, k, attrs){
   var candidates = subschema.enum.map(function(e){
     return m("option", {value: e}, [e]);
   });
-  return m("select", attrs, candidates);
+  return m("select.form-control", attrs, candidates);
 };
 
-
-Renderer.prototype.renderFieldInner = function(attributes, schema, k){
-  var attrs = {onchange: m.withAttr("value", attributes[k]), value: attributes[k]()};
+Renderer.prototype.renderFieldInner = function(props, schema, k){
+  var attrs = {onchange: m.withAttr("value", props[k]), value: props[k]()};
   if(!!schema.required){
     if(schema.required.indexOf(k) >= 0){
       attrs.required = "required";
@@ -44,10 +67,10 @@ Renderer.prototype.renderFieldInner = function(attributes, schema, k){
   }
   var subschema = schema.properties[k];
   if(!!subschema.enum){
-    return this.renderFieldSelect(attributes, subschema, k, attrs);
+    return this.renderFieldCandidates(props, subschema, k, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);
-    return this.renderFieldInput(attributes, subschema, k, attrs);
+    return this.renderFieldUnit(props, subschema, k, attrs);
   }
 };
 

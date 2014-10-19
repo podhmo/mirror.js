@@ -54,7 +54,7 @@
         ]
       };
 
-      var app = new Builder(new Renderer(new Config())).build(Schema, defaults);
+      var app = new Builder(new Renderer(new Config())).build(Schema, defaults, {"id": "mismatch"});
       var coreView = app.view;
       app.view = function(ctrl){
         return m("div", [

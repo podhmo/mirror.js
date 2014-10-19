@@ -109,22 +109,30 @@ function Renderer(config){
 
 // bootstrap
 
-Renderer.prototype.renderFieldOuter = function(k , core){
-  return m("div.form-group", [
-    m("label.control-label", {"for": k}, [k]),
-    m("div", [core])
-  ]);
-};
-
 Renderer.prototype.renderField = function(vm, schema, k){
-  return this.renderFieldOuter(k, this.renderFieldInner(vm, schema, k));
+  return this.renderFieldOuter(k, vm.errors, this.renderFieldInner(vm.attributes, schema, k));
 };
 
-Renderer.prototype.renderFieldInput = function(vm, subschema, k, attrs){
+Renderer.prototype.renderFieldOuter = function(k , errors, content){
+  if(!!errors[k]){
+    return m("div.form-group.has-error", [
+      m("label.control-label", {"for": k}, [k]),
+      m("div.has-feedback", [content]),
+      m("span.form-control-feedback", {"style": {"position": "static"}}, [errors[k]])
+    ]);
+  }else {
+    return m("div.form-group", [
+      m("label.control-label", {"for": k}, [k]),
+      m("div", [content])
+    ]);
+}
+};
+
+Renderer.prototype.renderFieldInput = function(attributes, subschema, k, attrs){
   return m("input.form-control", attrs);
 };
 
-Renderer.prototype.renderFieldSelect = function(vm, subschema, k, attrs){
+Renderer.prototype.renderFieldSelect = function(attributes, subschema, k, attrs){
   var candidates = subschema.enum.map(function(e){
     return m("option", {value: e}, [e]);
   });
@@ -132,8 +140,8 @@ Renderer.prototype.renderFieldSelect = function(vm, subschema, k, attrs){
 };
 
 
-Renderer.prototype.renderFieldInner = function(vm, schema, k){
-  var attrs = {onchange: m.withAttr("value", vm[k]), value: vm[k]()};
+Renderer.prototype.renderFieldInner = function(attributes, schema, k){
+  var attrs = {onchange: m.withAttr("value", attributes[k]), value: attributes[k]()};
   if(!!schema.required){
     if(schema.required.indexOf(k) >= 0){
       attrs.required = "required";
@@ -141,10 +149,10 @@ Renderer.prototype.renderFieldInner = function(vm, schema, k){
   }
   var subschema = schema.properties[k];
   if(!!subschema.enum){
-    return this.renderFieldSelect(vm, subschema, k, attrs);
+    return this.renderFieldSelect(attributes, subschema, k, attrs);
   }else {
     this.config.putAttrs(subschema, attrs);
-    return this.renderFieldInput(vm, subschema, k, attrs);
+    return this.renderFieldInput(attributes, subschema, k, attrs);
   }
 };
 
@@ -158,8 +166,8 @@ if(typeof module != "undefined" && module !== null){
   module.exports = Renderer;
 }
 
-function Builder(layout){
-  this.layout = layout;
+function Builder(renderer){
+  this.renderer = renderer;
 }
 
 function propWrap(parse, prop){
@@ -223,13 +231,15 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
   return vm;
 };
 
-Builder.prototype.buildViewModel = function(schema, defaults){
+Builder.prototype.buildViewModel = function(schema, defaults, errors){
   var vm = {};
   vm.init = function(){
-    return this.buildViewModelObject(vm, schema, defaults);
+    vm.errors = errors;
+    vm.attributes = this.buildViewModelObject({}, schema, defaults);
+    return vm;
   }.bind(this);
   vm.jsonify = function(){
-    return JSON.stringify(vm, null, 2);
+    return JSON.stringify(vm.attributes, null, 2);
   };
   return vm;
 };
@@ -240,10 +250,10 @@ Builder.prototype.buildView = function(schema){
     var fields = [];
     for(var k in schema.properties){
       if(schema.properties.hasOwnProperty(k)){
-        fields.push(this.layout.renderField(vm, schema, k));
+        fields.push(this.renderer.renderField(vm, schema, k));
       }
     }
-    return this.layout.renderForm(fields);
+    return this.renderer.renderForm(fields);
   }.bind(this);
 };
 
@@ -253,8 +263,8 @@ Builder.prototype.buildController = function(vm){
   };
 };
 
-Builder.prototype.build = function(schema, defaults){
-  var module = {vm: this.buildViewModel(schema, defaults), view: this.buildView(schema)};
+Builder.prototype.build = function(schema, defaults, errors){
+  var module = {vm: this.buildViewModel(schema, defaults, errors), view: this.buildView(schema)};
   module.controller = this.buildController(module.vm);
   return module;
 };

@@ -35,9 +35,15 @@ describe("Renderer", function(){
   });
   describe("renderFieldOuter", function(){
     it("outer", function(){
-      var result = this.renderer.renderFieldOuter("attrname", "*content*");
+      var result = this.renderer.renderFieldOuter("attrname", {}, "*content*");
       assert(containsText("attrname", result));
       assert(containsTag("label", result));
+    });
+    it("outer", function(){
+      var result = this.renderer.renderFieldOuter("attrname", {"attrname": "*mismatch*"}, "*content*");
+      assert(containsText("attrname", result));
+      assert(containsTag("label", result));
+      assert(containsText("*mismatch*", result));
     });
   });
   describe("renderFieldInner", function(){

@@ -63,11 +63,12 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
   return vm;
 };
 
-Builder.prototype.buildViewModel = function(schema, defaults){
+Builder.prototype.buildViewModel = function(schema, defaults, errors){
   var vm = {};
   vm.init = function(){
-    vm.attributes = {};
-    return this.buildViewModelObject(vm.attributes, schema, defaults);
+    vm.errors = errors;
+    vm.attributes = this.buildViewModelObject({}, schema, defaults);
+    return vm;
   }.bind(this);
   vm.jsonify = function(){
     return JSON.stringify(vm.attributes, null, 2);
@@ -95,7 +96,7 @@ Builder.prototype.buildController = function(vm){
 };
 
 Builder.prototype.build = function(schema, defaults, errors){
-  var module = {vm: this.buildViewModel(schema, defaults), view: this.buildView(schema)};
+  var module = {vm: this.buildViewModel(schema, defaults, errors), view: this.buildView(schema)};
   module.controller = this.buildController(module.vm);
   return module;
 };

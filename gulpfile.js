@@ -4,7 +4,7 @@ var espower = require("gulp-espower");
 var mocha = require("gulp-mocha");
 var paths = {
     test: "./test/*.js",
-    powered_test: "./powered-test/*.js",
+    powered_test: "./powered-test/test_builder.js",
     powered_test_dist: "./powered-test/"
 };
 

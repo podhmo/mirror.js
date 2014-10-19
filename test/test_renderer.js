@@ -2,7 +2,6 @@ var assert = require('power-assert');
 var config = require('../src/config');
 var renderer = require('../src/renderer');
 
-// dummy
 var m = require("mithril");
 
 var containsText = function(k, tree){

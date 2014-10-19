@@ -100,5 +100,5 @@ Config.prototype.putAttrs = function(schema, attrs){
 
 //for node.
 if(!!module && !!module.exports){
-  module.exports = Renderer;
+  module.exports = Config;
 }

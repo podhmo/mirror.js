@@ -99,6 +99,6 @@ Config.prototype.putAttrs = function(schema, attrs){
 };
 
 //for node.
-if(!!module && !!module.exports){
+if(typeof module != "undefined" && module !== null){
   module.exports = Config;
 }

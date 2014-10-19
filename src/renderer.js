@@ -43,7 +43,7 @@ Renderer.prototype.renderForm = function(fields){
 };
 
 //for node.
-if(!!module && !!module.exports){
+if(typeof module != "undefined" && module !== null){
   var m = require("mithril");
   module.exports = Renderer;
 }

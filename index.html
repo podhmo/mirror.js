@@ -8,5 +8,59 @@
     </section>
     <script type="text/javascript" src="bower_components/mithril/mithril.js"></script>
     <script type="text/javascript" src="static/js/app.js"></script>
+    <script>
+      var defaults = {id: 1};
+      var Schema = {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "surname": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "gender": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "M",
+              "F"
+            ]
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date"
+          },
+          "age": {
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "title": "Person",
+        "required": [
+          "id",
+          "name",
+          "surname",
+          "gender"
+        ]
+      };
+
+      var app = new Builder(new Renderer(new Config())).build(Schema, defaults);
+      var coreView = app.view;
+      app.view = function(ctrl){
+        return m("div", [
+        coreView(ctrl),
+        m("pre", [ctrl.vm.jsonify()])
+        ]);
+      };
+
+      m.module(
+        document.querySelector("#app"), app
+      );
+    </script>
   </body>
 </html>

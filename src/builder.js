@@ -100,7 +100,7 @@ Builder.prototype.build = function(schema, defaults){
 };
 
 //for node.
-if(!!module && !!module.exports){
+if(typeof module != "undefined" && module !== null){
   module.exports = Builder;
   Number.parseInt = function(n){return +n;};
   Number.parseFloat = function(n){return +n;};

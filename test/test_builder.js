@@ -65,7 +65,12 @@ describe("Renderer", function(){
       var result = this.builder.buildViewModel(schema);
       result.init();
       assert(result.jsonify() === JSON.stringify({"id": null, "name": "", "group": {"id": null, "name": ""}}, null, 2));
-
     });
+    // it("struct flag check", function(){
+    //   var schema = {"properties": {"ob": {"x": {"type": "string"}}}};
+    //   var result = this.builder.buildViewModel(schema, {"ob": {"x": "xxxx"}});
+    //   result.init();
+    //   assert(!!result.ob.struct);
+    // });
   });
 });

@@ -9,7 +9,7 @@ var paths = {
 };
 
 gulp.task('default', function(){
-  gulp.src('./src/*.js')
+  gulp.src(['./src/config.js', './src/renderer.js', './src/builder.js'])
     .pipe(concat('app.js'))
     .pipe(gulp.dest('./static/js'));
 });

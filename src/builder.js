@@ -60,7 +60,7 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         }
         // xxx:
         if(!!subschema.enum && subschema.type !== "array"){
-          vm[k](subschema.enum[0]);
+          vm[k](vm[k]() || subschema.enum[0]);
         }
       }
     }

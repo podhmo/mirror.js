@@ -56,16 +56,27 @@ Renderer.prototype.radio = function(props, subschema, k, attrs){
 };
 
 Renderer.prototype.select = function(props, subschema, k, attrs, multiple){
-  var default_value = props[k]();
-  var candidates = subschema.enum.map(function(e){
-    var cattrs = {value: e};
-    if(default_value === e){
-      cattrs.checked = "checked";
-    }
-    return m("option", cattrs, [e]);
-  });
-  if(!!multiple){
+  var candidates;
+  var default_value;
+  if(multiple){
     attrs.multiple = "multiple";
+    default_value = props[k]().items;
+    candidates = subschema.enum.map(function(e){
+      var cattrs = {value: e};
+      if(default_value.indexOf(e) >= 0){
+        cattrs.selected = "selected";
+      }
+      return m("option", cattrs, [e]);
+    });
+  }else{
+    default_value = props[k]();
+    candidates = subschema.enum.map(function(e){
+      var cattrs = {value: e};
+      if(default_value === e){
+        cattrs.selected = "selected";
+      }
+      return m("option", cattrs, [e]);
+    });
   }
   return m("select.form-control", attrs, candidates);
 };

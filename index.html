@@ -14,7 +14,7 @@
     <script type="text/javascript" src="bower_components/mithril/mithril.js"></script>
     <script type="text/javascript" src="static/js/app.js"></script>
     <script>
-      var defaults = {id: 1, multiitem: ["A","D"]};
+      var defaults = {id: 1, multiitem: ["A","D"], gender: "F"};
       var Schema = {
         "properties": {
           "id": {
@@ -29,7 +29,6 @@
             "maxLength": 32
           },
           "gender": {
-"widget":"radio",
             "type": "string",
             "maxLength": 1,
             "enum": [
@@ -38,7 +37,6 @@
             ]
           },
           "multiitem": {
-"widget":"check",
             "type": "array",
             "enum": [
               "A",

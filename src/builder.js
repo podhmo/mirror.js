@@ -27,6 +27,8 @@ Builder.prototype.buildViewModelFromDefinition = function(vm, schema, defaults, 
   return result;
 };
 
+function tobool(x){return !!x;}
+
 Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
   defaults = defaults || {};
   for(var k in schema.properties){
@@ -39,6 +41,8 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         if(typ === "array"){
           vm[k] = m.prop(new Collection(defaults[k] || [])); //xxx;
           vm[k]().bind(vm[k]);
+        }else if(typ === "boolean"){
+          vm[k] = propWrap(tobool, m.prop(tobool(defaults[k])));
         }else if(typ === "integer"){
           vm[k] = propWrap(Number.parseInt, m.prop(Number.parseInt(defaults[k])));
         }else if(typ === "number"){

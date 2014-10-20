@@ -24,4 +24,15 @@ describe("Collection", function(){
       assert(target.items[2] === [1,2,3][2]);
     });
   });
+  describe("remove", function(){
+    it("remove element", function(){
+      var arr = [1,2,3];
+      var target = new Collection(arr);
+      target.remove(1);
+
+      assert(target.items.length === [2,3].length);
+      assert(target.items[0] === [2,3][0]);
+      assert(target.items[1] === [2,3][1]);
+    });
+  });
 });

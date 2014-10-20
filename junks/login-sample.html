@@ -1,0 +1,23 @@
+<html>
+<head>
+  <meta charset="UTF8"/>
+</head>
+<body>
+<section id="app"></section>
+<script src="bower_components/mithril/mithril.min.js"></script>
+<script src="./static/js/login.login.js"></script>
+<script src="./static/js/login.dashboard.js"></script>
+<script src="./static/js/login.header.js"></script>
+<script src="./static/js/login.repository.js"></script>
+<script type="text/javascript">
+  m.route.mode = "hash";
+
+  m.route(document.querySelector("#app"), "/login",
+  {
+    "/login": login,
+    "/dashboard/:user_id": dashboard
+  }
+  );
+</script>
+</body>
+</html>

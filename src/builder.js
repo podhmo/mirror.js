@@ -44,9 +44,9 @@ Builder.prototype.buildViewModelObject = function(vm, schema, defaults){
         }else if(typ === "boolean"){
           vm[k] = propWrap(tobool, m.prop(tobool(defaults[k])));
         }else if(typ === "integer"){
-          vm[k] = propWrap(Number.parseInt, m.prop(Number.parseInt(defaults[k])));
+          vm[k] = propWrap(parseInt, m.prop(parseInt(defaults[k])));
         }else if(typ === "number"){
-          vm[k] = propWrap(Number.parseFloat, m.prop(Number.parseFloat(defaults[k])));
+          vm[k] = propWrap(parseFloat, m.prop(parseFloat(defaults[k])));
         }else if(typ === "object"){
           if(!!subschema.$ref){
             vm[k] = this.buildViewModelFromDefinition({}, schema, defaults, subschema.$ref);
@@ -110,11 +110,8 @@ Builder.prototype.build = function(schema, defaults, errors){
   return module;
 };
 
-
 //for node.
 if(typeof module != "undefined" && module !== null){
   Collection = require("./collection");
   module.exports = Builder;
-  Number.parseInt = parseInt;
-  Number.parseFloat = function(n){return +n;};
 }

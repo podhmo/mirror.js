@@ -1,0 +1,19 @@
+{
+  "name": "schemaform",
+  "version": "0.0.0",
+  "authors": [
+    "podhmo <podhmo+altair@beproud.jp>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "mithril": "~0.1.22",
+    "bootstrap": "~3.2.0"
+  }
+}

@@ -74,14 +74,16 @@
         ]
       };
 
-      var app = new Builder(new Renderer(new Config())).build(Schema, defaults, {"id": "mismatch"});
-      var coreView = app.view;
-      app.view = function(ctrl){
-        return m("div", [
-        coreView(ctrl),
-        m("pre", [ctrl.vm.jsonify()])
-        ]);
-      };
+      var SchemaForm = new Builder(new Renderer(new Config())).build(Schema, defaults, {"id": "mismatch"});
+      var app = {
+        controller: function(){ this.form = new SchemaForm.controller();},
+        view: function(ctrl){
+          return m("div", [
+          SchemaForm.view(ctrl.form),
+          m("pre", [ctrl.form.vm.jsonify()])
+          ]);
+        }
+      }
 
       m.module(
         document.querySelector("#app"), app

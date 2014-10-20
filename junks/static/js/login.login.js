@@ -16,9 +16,16 @@ login.User = function(){
   }.bind(this);
 
   this.submit = function(name, password){
-    this.name(name);
-    this.password(password);
-    return repository.saveUser(this);
+    return new Promise(function(resolve, reject){
+      if(this.assertName(name) && this.assertPassword(password)){
+        this.name(name);
+        this.password(password);
+        resolve(repository.saveUser(this));
+      }else {
+        reject("ユーザー名かpasswordが間違っています");
+      }
+    }.bind(this));
+
   }.bind(this);
 };
 
@@ -32,12 +39,11 @@ login.vm.init = function(cb){
   this.password = m.prop("");
 
   this.submit = function(){
-    if(this.user.assertName(this.name()) && this.user.assertPassword(this.password())){
-      this.message("ok");
-      cb(this.user.submit(this.name(), this.password()));
-    }else{
-      this.message("ユーザー名かpasswordが間違っています");
-    }
+    return this.user.submit(this.name(), this.password())
+      .then(
+        function ok(user_id){ cb(user_id);},
+        function ng(message){ this.message(message);}.bind(this)
+      );
   }.bind(this);
 };
 

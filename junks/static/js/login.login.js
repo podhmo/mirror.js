@@ -20,11 +20,11 @@ login.User = function(){
       if(this.assertName(name) && this.assertPassword(password)){
         this.name(name);
         this.password(password);
-        resolve(repository.saveUser(this));
+        resolve(this);
       }else {
-        reject("ユーザー名かpasswordが間違っています");
+        reject(new Error("ユーザー名かpasswordが間違っています"));
       }
-    }.bind(this));
+    }.bind(this)).then(repository.saveUser.bind(repository));
 
   }.bind(this);
 };

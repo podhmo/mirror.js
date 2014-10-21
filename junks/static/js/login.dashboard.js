@@ -6,8 +6,12 @@ dashboard.vm.init = function(user){
 };
 
 dashboard.controller = function(){
-  user = repository.loadUser(m.route.param("user_id"));
-  dashboard.vm.init(user);
+  user = repository.loadUser(m.route.param("user_id"))
+    .then(function(user){
+      dashboard.vm.init(user);
+    }).catch(function(){
+      m.route("/login");
+    });
 };
 
 dashboard.view = function(ctrl){
